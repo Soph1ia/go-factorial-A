@@ -2,26 +2,30 @@ package main
 
 import (
 	"fmt"
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"math/big"
+	"strconv"
 	"time"
 )
 
-type MyEvent struct {
-	Message int     `json:"Message"`
-}
+func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
-type MyResponse struct {
-	Message string `json:"Answer:"`
-}
+	number, _ := strconv.Atoi(request.Body)
+	response := fmt.Sprintf("Factorial of %v took %v ops/ns", number,benchmark(number))
 
-func HandleLambdaEvent(event MyEvent) (MyResponse, error) {
-	benchmark(event.Message)
-	return MyResponse{Message: fmt.Sprintf(" factorial took %v ops/ns", event.Message)}, nil
+	return events.APIGatewayProxyResponse{
+		StatusCode: 200,
+		Body:       response,
+		Headers: map[string]string{
+			"Content-Type": "text/html",
+		},
+	}, nil
+
 }
 
 func main() {
-	lambda.Start(HandleLambdaEvent)
+	lambda.Start(Handler)
 }
 
 
